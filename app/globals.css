@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 20%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+
+    --primary: 360 99% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 196 97% 47%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+
+    --accent: 196 97% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 360 99% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 196 97% 47%;
+
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 360 99% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 196 97% 47%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 196 97% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 360 99% 62%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 196 97% 47%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-base-white text-neutral-dark;
+  }
+}
+
+/* Custom styles for dashboard */
+.dashboard-card {
+  @apply bg-base-white rounded-xl border border-neutral-gray shadow-card transition-all duration-300 hover:shadow-hover overflow-hidden;
+}
+
+.dashboard-card-header {
+  @apply p-5 border-b border-neutral-gray;
+}
+
+.dashboard-card-content {
+  @apply p-5;
+}
+
+.dashboard-card-accent {
+  @apply bg-gradient-to-r from-primary-red to-primary-red/90 text-base-white;
+}
+
+.dashboard-card-secondary {
+  @apply bg-gradient-to-r from-accent-blue to-accent-blue/90 text-base-white;
+}
+
+.dashboard-stat {
+  @apply text-3xl font-bold text-primary-red;
+}
+
+.dashboard-btn-primary {
+  @apply bg-primary-red hover:bg-primary-red/90 text-base-white transition-colors;
+}
+
+.dashboard-btn-secondary {
+  @apply bg-accent-blue hover:bg-accent-blue/90 text-base-white transition-colors;
+}
+
+.dashboard-btn-outline-primary {
+  @apply border-2 border-primary-red text-primary-red hover:bg-primary-red/10 transition-colors;
+}
+
+.dashboard-btn-outline-secondary {
+  @apply border-2 border-accent-blue text-accent-blue hover:bg-accent-blue/10 transition-colors;
+}
+
+/* Animation classes */
+.animate-enter {
+  @apply opacity-0;
+  animation: slide-up 0.4s ease forwards;
+}
+
+.animate-enter-delay-1 {
+  animation-delay: 0.1s;
+}
+
+.animate-enter-delay-2 {
+  animation-delay: 0.2s;
+}
+
+.animate-enter-delay-3 {
+  animation-delay: 0.3s;
+}
+
+.animate-enter-delay-4 {
+  animation-delay: 0.4s;
+}
+
+@keyframes slide-up {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Tooltip styles */
+.tooltip {
+  @apply relative inline-block;
+}
+
+.tooltip .tooltip-text {
+  @apply invisible absolute z-10 w-64 rounded-md bg-neutral-dark p-2 text-xs text-base-white opacity-0 transition-opacity duration-300;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -8rem;
+}
+
+.tooltip .tooltip-text::after {
+  @apply absolute border-8 border-transparent;
+  content: "";
+  top: 100%;
+  left: 50%;
+  margin-left: -8px;
+  border-top-color: #333333;
+}
+
+.tooltip:hover .tooltip-text {
+  @apply visible opacity-100;
+}
