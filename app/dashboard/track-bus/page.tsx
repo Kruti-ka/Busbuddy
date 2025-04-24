@@ -1,4 +1,4 @@
-import TrackBus from '@/components/track-bus';
+import TrackBus from '@/components/bus-map';
 
 export default function Home() {
   return (
