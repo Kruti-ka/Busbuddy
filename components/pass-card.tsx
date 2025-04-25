@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -105,6 +104,9 @@ export function PassCard({ pass }: PassCardProps) {
     }
   }
 
+  // Determine which profile image URL to use - prioritize the one from the pass
+  const profileImageUrl = pass.profileImageUrl || userProfile?.profileImageUrl || "/placeholder.svg"
+
   return (
     <Card className="dashboard-card overflow-hidden">
       <CardHeader className="dashboard-card-header bg-gradient-to-r from-primary to-primary/90 text-white">
@@ -142,7 +144,7 @@ export function PassCard({ pass }: PassCardProps) {
             <div className="flex items-center gap-4">
               <Avatar className="h-16 w-16 border-2 border-primary">
                 <AvatarImage 
-                  src={userProfile?.profileImageUrl || "/placeholder.svg"} 
+                  src={profileImageUrl} 
                   alt={pass.fullName} 
                 />
                 <AvatarFallback className="bg-primary text-white">
@@ -236,4 +238,3 @@ export function PassCard({ pass }: PassCardProps) {
     </Card>
   )
 }
-

@@ -1,3 +1,4 @@
+// E:\PERSONAL\KRITIKA\bus buddy ver 1\Busbuddy\app\dashboard\create-pass\page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -15,6 +16,7 @@ import { CreatePassForm } from "@/components/create-pass-form"
 import { PaymentForm } from "@/components/payment-form"
 import { LoadingScreen } from "@/components/loading-screen"
 import { useToast } from "@/components/ui/use-toast"
+import { uploadImageToCloudinary } from "@/lib/cloudinary"
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ||
@@ -29,6 +31,8 @@ const formSchema = z.object({
   source: z.string().min(1, "Source is required"),
   destination: z.string().min(1, "Destination is required"),
   route: z.string().min(1, "Route is required"),
+  startDate: z.date(),
+  endDate: z.date().optional(),
   profileImage: z.any().optional(),
 })
 
@@ -41,6 +45,7 @@ export default function CreatePass() {
   const [showPayment, setShowPayment] = useState(false)
   const [passData, setPassData] = useState<z.infer<typeof formSchema> | null>(null)
   const [amount, setAmount] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +57,7 @@ export default function CreatePass() {
       source: "",
       destination: "",
       route: "",
+      startDate: new Date(),
     },
   })
 
@@ -95,39 +101,84 @@ export default function CreatePass() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!user) return
+    
+    setIsProcessing(true)
+    
+    try {
+      // Calculate amount based on validity
+      let calculatedAmount = 0
+      switch (data.validity) {
+        case "7":
+          calculatedAmount = 500
+          break
+        case "15":
+          calculatedAmount = 900
+          break
+        case "30":
+          calculatedAmount = 1500
+          break
+      }
 
-    // Calculate amount based on validity
-    let calculatedAmount = 0
-    switch (data.validity) {
-      case "7":
-        calculatedAmount = 500
-        break
-      case "15":
-        calculatedAmount = 900
-        break
-      case "30":
-        calculatedAmount = 1500
-        break
+      setAmount(calculatedAmount)
+      setPassData(data)
+      setShowPayment(true)
+    } catch (error) {
+      console.error("Error processing form:", error)
+      toast({
+        title: "Error",
+        description: "There was an error processing your request. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsProcessing(false)
     }
-
-    setAmount(calculatedAmount)
-    setPassData(data)
-    setShowPayment(true)
   }
 
   const handlePaymentSuccess = async (paymentIntentId: string) => {
-    if (!user || !passData) return
+    if (!user || !passData) return;
 
     try {
-      setLoading(true)
+      setLoading(true);
+      toast({
+        title: "Processing",
+        description: "Creating your pass and uploading image...",
+        variant: "default",
+      });
 
-      // Calculate dates
-      const startDate = new Date()
-      const endDate = new Date()
-      endDate.setDate(endDate.getDate() + Number.parseInt(passData.validity))
+      // Upload image to Cloudinary if exists
+      let profileImageUrl = null;
+      
+      if (passData.profileImage) {
+        console.log("Profile image found:", typeof passData.profileImage);
+        
+        if (passData.profileImage instanceof File) {
+          try {
+            // Upload the image to Cloudinary
+            console.log("Uploading file to Cloudinary...");
+            profileImageUrl = await uploadImageToCloudinary(passData.profileImage);
+            console.log("Upload successful, URL:", profileImageUrl);
+          } catch (uploadError) {
+            console.error("Image upload failed:", uploadError);
+            // Continue with null image URL
+            toast({
+              title: "Image Upload Failed",
+              description: "We couldn't upload your profile image, but will continue creating your pass.",
+              variant: "default",
+            });
+          }
+        } else if (typeof passData.profileImage === 'string') {
+          // If it's already a URL, use it directly
+          profileImageUrl = passData.profileImage;
+        }
+      }
 
-      // Create pass in Firestore
-      const passRef = await addDoc(collection(db, "passes"), {
+      // Calculate end date based on start date and validity
+      const startDate = passData.startDate || new Date();
+      const endDate = new Date(startDate);
+      endDate.setDate(endDate.getDate() + Number.parseInt(passData.validity));
+
+      // Create pass object with all required fields
+      const passObject = {
         userId: user.uid,
         fullName: passData.fullName,
         emergencyContactName: passData.emergencyContactName,
@@ -140,28 +191,31 @@ export default function CreatePass() {
         endDate: endDate.toISOString(),
         amount,
         paymentIntentId,
-        profileImageUrl: passData.profileImage || null,
         createdAt: Timestamp.now(),
-      })
+        profileImageUrl: profileImageUrl, // Always include this property whether null or has a URL
+      };
+
+      // Create pass in Firestore
+      const passRef = await addDoc(collection(db, "passes"), passObject);
 
       toast({
         title: "Pass created successfully!",
         description: "Your digital bus pass has been created.",
         variant: "default",
-      })
+      });
 
-      router.push("/dashboard/view-pass")
+      router.push("/dashboard/view-pass");
     } catch (error) {
-      console.error("Error creating pass:", error)
+      console.error("Error creating pass:", error);
       toast({
         title: "Error creating pass",
         description: "There was an error creating your pass. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return <LoadingScreen />
@@ -193,7 +247,7 @@ export default function CreatePass() {
           </Elements>
         </div>
       ) : (
-        <CreatePassForm form={form} onSubmit={onSubmit} />
+        <CreatePassForm form={form} onSubmit={onSubmit} isProcessing={isProcessing} />
       )}
     </div>
   )

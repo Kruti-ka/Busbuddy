@@ -25,7 +25,6 @@ interface BusPass {
 }
 
 export default function ViewPass() {
-  
   const router = useRouter()
   const { user, userProfile } = useAuth()
   const [loading, setLoading] = useState(true)
@@ -42,7 +41,15 @@ export default function ViewPass() {
 
         // Find active pass
         const activePass = passesSnapshot.docs
-          .map((doc) => ({ id: doc.id, ...doc.data() } as BusPass))
+          .map((doc) => {
+            const data = doc.data();
+            return { 
+              id: doc.id, 
+              ...data,
+              // Make sure to include profileImageUrl if it exists in Firestore
+              profileImageUrl: data.profileImageUrl || undefined
+            } as BusPass;
+          })
           .find((pass) => new Date(pass.endDate) >= now)
 
         if (activePass) {
@@ -55,6 +62,8 @@ export default function ViewPass() {
               fullName: activePass.fullName,
               startDate: activePass.startDate,
               endDate: activePass.endDate,
+              // Include profileImageUrl in the pass-cards collection
+              profileImageUrl: activePass.profileImageUrl,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp()
             },
@@ -82,7 +91,8 @@ export default function ViewPass() {
       <DashboardHeader title="View Pass" description="View your active digital bus pass" />
 
       {pass ? (
-        <PassCard pass={{ ...pass, profileImageUrl: userProfile?.profileImageUrl }} />
+        // Pass both the pass object directly - it already contains the profileImageUrl if available
+        <PassCard pass={pass} />
       ) : (
         <div className="flex flex-col items-center justify-center space-y-4 rounded-lg border bg-card p-8 text-center shadow-sm">
           <h2 className="text-2xl font-bold">No Active Pass Found</h2>

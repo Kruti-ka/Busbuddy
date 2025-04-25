@@ -1,3 +1,4 @@
+// E:\PERSONAL\KRITIKA\bus buddy ver 1\Busbuddy\components\image-upload.tsx
 "use client"
 
 import { useCallback, useState, useEffect } from "react"
@@ -16,6 +17,7 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(
     typeof value === "string" ? value : null
   )
+  
   useEffect(() => {
     if (typeof value === "string") {
       setPreview(value)
@@ -31,12 +33,15 @@ export function ImageUpload({ value, onChange }: ImageUploadProps) {
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       if (acceptedFiles.length > 0) {
-        const file = acceptedFiles[0]
-        onChange(file)
+        const file = acceptedFiles[0];
+        console.log("File selected:", file.name, "Size:", file.size, "Type:", file.type);
+        
+        // Pass the File object directly to the onChange handler
+        onChange(file);
       }
     },
     [onChange],
-  )
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

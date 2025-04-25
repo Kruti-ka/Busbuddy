@@ -33,9 +33,10 @@ const LOCATIONS = [
 interface CreatePassFormProps {
   form: UseFormReturn<any>
   onSubmit: (data: any) => void
+  isProcessing?: boolean
 }
 
-export function CreatePassForm({ form, onSubmit }: CreatePassFormProps) {
+export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreatePassFormProps) {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
@@ -392,9 +393,22 @@ export function CreatePassForm({ form, onSubmit }: CreatePassFormProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
             >
-              <Button type="submit" className="w-full bg-primary-red hover:bg-primary-red/90 text-base-white">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Proceed to Payment
+              <Button 
+                type="submit" 
+                className="w-full bg-primary-red hover:bg-primary-red/90 text-base-white"
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <>
+                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
+                    Processing...
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Proceed to Payment
+                  </>
+                )}
               </Button>
             </motion.div>
           </form>
