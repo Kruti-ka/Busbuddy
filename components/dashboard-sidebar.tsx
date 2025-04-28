@@ -67,7 +67,7 @@ export function DashboardSidebar() {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild className="md:hidden">
-          <Button variant="outline" size="icon" className="absolute left-4 top-4 border-primary-red text-primary-red">
+          <Button variant="outline" size="icon" className="absolute left-4 top-4 border-primary text-primary">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
           </Button>
@@ -76,38 +76,43 @@ export function DashboardSidebar() {
           <div className="flex h-full flex-col">
             <div className="border-b border-neutral-gray p-4">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-primary-red">BusBuddy</span>
+                <span className="text-xl font-bold text-primary">BusBuddy</span>
               </div>
             </div>
             <div className="flex-1 overflow-auto py-2">
               <nav className="grid gap-1 px-2">
-                {routes.map((route, index) => (
-                  <Link
-                    key={route.href}
-                    href={route.href}
-                    onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-neutral-gray ${
-                      pathname === route.href
-                        ? index % 2 === 0
-                          ? "bg-primary-red text-base-white"
-                          : "bg-accent-blue text-base-white"
-                        : "text-neutral-dark"
-                    }`}
-                  >
-                    <route.icon className="h-4 w-4" />
-                    {route.label}
-                  </Link>
-                ))}
+                {routes.map((route, index) => {
+                  const isActive = pathname === route.href;
+                  const isPrimary = index % 2 === 0;
+                  
+                  return (
+                    <Link
+                      key={route.href}
+                      href={route.href}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? isPrimary
+                            ? "bg-primary/90 text-white shadow-sm"
+                            : "bg-secondary/90 text-white shadow-sm"
+                          : "text-neutral-dark hover:bg-neutral-gray"
+                      }`}
+                    >
+                      <route.icon className={`h-4 w-4 ${isActive ? "text-white" : ""}`} />
+                      <span className={isActive ? "font-semibold" : ""}>{route.label}</span>
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
             <div className="border-t border-neutral-gray p-4">
               <div className="flex items-center gap-4">
-                <Avatar className="h-9 w-9 border-2 border-accent-blue">
+                <Avatar className="h-9 w-9 border-2 border-secondary">
                   <AvatarImage
                     src={userProfile?.profileImageUrl || "/placeholder.svg"}
                     alt={userProfile?.fullName || user?.email || ""}
                   />
-                  <AvatarFallback className="bg-primary-red text-base-white">
+                  <AvatarFallback className="bg-primary text-base-white">
                     {userProfile?.fullName?.charAt(0) || user?.email?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -119,7 +124,7 @@ export function DashboardSidebar() {
                   variant="ghost"
                   size="icon"
                   onClick={() => logOut()}
-                  className="ml-auto text-primary-red hover:bg-primary-red/10 hover:text-primary-red"
+                  className="ml-auto text-primary hover:bg-primary/10 hover:text-primary"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="sr-only">Log out</span>
@@ -138,7 +143,7 @@ export function DashboardSidebar() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
-                className="text-xl font-bold text-primary-red"
+                className="text-xl font-bold text-primary"
               >
                 BusBuddy
               </motion.span>
@@ -146,38 +151,43 @@ export function DashboardSidebar() {
           </div>
           <div className="flex-1 overflow-auto py-2">
             <nav className="grid gap-1 px-2">
-              {routes.map((route, index) => (
-                <motion.div
-                  key={route.href}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                >
-                  <Link
-                    href={route.href}
-                    className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-neutral-gray ${
-                      pathname === route.href
-                        ? index % 2 === 0
-                          ? "bg-primary-red text-base-white"
-                          : "bg-accent-blue text-base-white"
-                        : "text-neutral-dark"
-                    }`}
+              {routes.map((route, index) => {
+                const isActive = pathname === route.href;
+                const isPrimary = index % 2 === 0;
+                
+                return (
+                  <motion.div
+                    key={route.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
                   >
-                    <route.icon className="h-4 w-4" />
-                    {route.label}
-                  </Link>
-                </motion.div>
-              ))}
+                    <Link
+                      href={route.href}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? isPrimary
+                            ? "bg-primary/90 text-white shadow-sm"
+                            : "bg-secondary/90 text-white shadow-sm"
+                          : "text-neutral-dark hover:bg-neutral-gray"
+                      }`}
+                    >
+                      <route.icon className={`h-4 w-4 ${isActive ? "text-white" : ""}`} />
+                      <span className={isActive ? "font-semibold" : ""}>{route.label}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
             </nav>
           </div>
           <div className="border-t border-neutral-gray p-4">
             <div className="flex items-center gap-4">
-              <Avatar className="h-9 w-9 border-2 border-accent-blue">
+              <Avatar className="h-9 w-9 border-2 border-secondary">
                 <AvatarImage
                   src={userProfile?.profileImageUrl || "/placeholder.svg"}
                   alt={userProfile?.fullName || user?.email || ""}
                 />
-                <AvatarFallback className="bg-primary-red text-base-white">
+                <AvatarFallback className="bg-primary text-base-white">
                   {userProfile?.fullName?.charAt(0) || user?.email?.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
@@ -189,7 +199,7 @@ export function DashboardSidebar() {
                 variant="ghost"
                 size="icon"
                 onClick={() => logOut()}
-                className="ml-auto text-primary-red hover:bg-primary-red/10 hover:text-primary-red"
+                className="ml-auto text-primary hover:bg-primary/10 hover:text-primary"
               >
                 <LogOut className="h-4 w-4" />
                 <span className="sr-only">Log out</span>

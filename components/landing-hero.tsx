@@ -37,7 +37,7 @@ export function LandingHero() {
           <div className="flex items-center justify-center">
             <div className="relative h-[350px] w-[350px] md:h-[400px] md:w-[400px] lg:h-[500px] lg:w-[500px]">
               <Image
-                src="./2791631.jpg"
+                src="./image.png"
                 alt="BusBuddy App"
                 fill
                 className="object-contain"

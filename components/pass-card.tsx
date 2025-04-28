@@ -6,9 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Calendar, Clock, MapPin, Route, Download, Share2 } from "lucide-react"
+import { Calendar, Clock, MapPin, Route, Download, Share2, Phone } from "lucide-react"
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
+import { cn } from "@/lib/utils"
 
 interface PassCardProps {
   pass: {
@@ -104,137 +105,208 @@ export function PassCard({ pass }: PassCardProps) {
     }
   }
 
-  // Determine which profile image URL to use - prioritize the one from the pass
+  // Determine which profile image URL to use
   const profileImageUrl = pass.profileImageUrl || userProfile?.profileImageUrl || "/placeholder.svg"
 
   return (
-    <Card className="dashboard-card overflow-hidden">
-      <CardHeader className="dashboard-card-header bg-gradient-to-r from-primary to-primary/90 text-white">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <motion.div
-              initial={{ rotate: -10, scale: 0.9 }}
-              animate={{ rotate: 0, scale: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              Digital Bus Pass
-            </motion.div>
-          </CardTitle>
-          <Badge
-            variant={daysRemaining > 7 ? "outline" : "destructive"}
-            className={
-              daysRemaining > 7
-                ? "bg-accent/20 text-white border-white/30"
-                : "bg-destructive text-white border-white/30"
-            }
-          >
-            {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Expired"}
-          </Badge>
-        </div>
-      </CardHeader>
-
-      <CardContent className="p-6">
-        <div className="grid gap-8 md:grid-cols-2">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
-          >
-            <div className="flex items-center gap-4">
-              <Avatar className="h-16 w-16 border-2 border-primary">
-                <AvatarImage 
-                  src={profileImageUrl} 
-                  alt={pass.fullName} 
-                />
-                <AvatarFallback className="bg-primary text-white">
-                  {pass.fullName?.charAt(0) || "U"}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="text-xl font-bold text-primary">{pass.fullName}</h3>
-                <p className="text-sm text-muted-foreground">Pass ID: {pass.id.substring(0, 8)}</p>
+    <div className="max-w-4xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        <Card className="overflow-hidden border-0 shadow-xl">
+          {/* Card Header with Solid Color */}
+          <CardHeader className={cn(
+            "relative p-6 text-white",
+            "bg-primary",
+            "border-b border-white/10"
+          )}>
+            <div className="absolute inset-0 bg-noise opacity-10" />
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <CardTitle className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <span className="bg-white/20 p-2 rounded-lg">
+                      <Route className="h-5 w-5" />
+                    </span>
+                    Digital Bus Pass
+                  </CardTitle>
+                </motion.div>
               </div>
-            </div>
-
-            <div className="space-y-3 rounded-lg bg-muted p-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-sm">
-                  Valid from: <span className="font-medium">{formatDate(pass.startDate)}</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" />
-                <span className="text-sm">
-                  Valid until: <span className="font-medium">{formatDate(pass.endDate)}</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-sm">
-                  <span className="font-medium">{pass.source}</span> to{" "}
-                  <span className="font-medium">{pass.destination}</span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Route className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">{pass.route}</span>
-              </div>
-            </div>
-
-            <div className="space-y-2 rounded-lg bg-accent/10 p-4">
-              <h4 className="font-medium text-accent">Emergency Contact</h4>
-              <p className="text-sm">
-                <span className="font-medium">{pass.emergencyContactName}:</span> {pass.emergencyContactMobile}
-              </p>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex flex-col items-center justify-center space-y-4"
-          >
-            <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              className="rounded-lg bg-white p-3 shadow-md"
-            >
-              <QRCodeSVG
-                id="qr-code-svg"
-                value={qrValue}
-                size={200}
-                level="H"
-                includeMargin
-                bgColor="#FFFFFF"
-                fgColor="#000000"
-              />
-            </motion.div>
-            <p className="text-center text-sm text-muted-foreground">Scan this QR code to validate your pass</p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="border-primary text-primary hover:bg-primary/10"
-                onClick={handleDownload}
+              
+              <Badge
+                variant={daysRemaining > 7 ? "outline" : "destructive"}
+                className={cn(
+                  "text-sm font-medium py-1.5 px-3 rounded-lg shadow-sm",
+                  daysRemaining > 7 
+                    ? "bg-white/10 text-white backdrop-blur-sm border-white/20"
+                    : "bg-destructive text-white border-white/20"
+                )}
               >
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </Button>
-              <Button
-                variant="outline"
-                className="border-accent text-accent hover:bg-accent/10"
-                onClick={handleShare}
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Share
-              </Button>
+                {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Expired"}
+              </Badge>
             </div>
-          </motion.div>
-        </div>
-      </CardContent>
-    </Card>
+          </CardHeader>
+
+          <CardContent className="p-0">
+            <div className="grid md:grid-cols-2 divide-x divide-gray-100 dark:divide-gray-800">
+              {/* Left Section */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                className="p-6 space-y-6"
+              >
+                {/* User Profile */}
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <Avatar className="h-20 w-20 border-4 border-white shadow-lg">
+                      <AvatarImage 
+                        src={profileImageUrl} 
+                        alt={pass.fullName}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="bg-primary text-white font-medium">
+                        {pass.fullName?.charAt(0) || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </motion.div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white">{pass.fullName}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Pass ID: <span className="font-mono font-medium">{pass.id.substring(0, 8)}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pass Details */}
+                <div className="space-y-4 rounded-xl bg-gray-50 dark:bg-gray-800/50 p-5 border border-gray-200 dark:border-gray-700">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <Calendar className="h-4 w-4 text-primary" />
+                        <span>Start Date</span>
+                      </div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {formatDate(pass.startDate)}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <span>End Date</span>
+                      </div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {formatDate(pass.endDate)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <span>Route</span>
+                    </div>
+                    <p className="font-medium text-gray-900 dark:text-white">
+                      {pass.source} → {pass.destination}
+                    </p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      <Route className="inline h-3 w-3 mr-1" />
+                      {pass.route}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Emergency Contact */}
+                <div className="space-y-3 rounded-xl bg-destructive/10 dark:bg-destructive/20 p-5 border border-destructive/20 dark:border-destructive/30">
+                  <h4 className="flex items-center gap-2 font-medium text-destructive dark:text-destructive-foreground">
+                    <Phone className="h-4 w-4" />
+                    Emergency Contact
+                  </h4>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">
+                        {pass.emergencyContactName}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {pass.emergencyContactMobile}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-destructive dark:text-destructive-foreground">
+                      Call
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Right Section - QR Code */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="p-6 flex flex-col items-center justify-center space-y-6 bg-gray-50 dark:bg-gray-800/30"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, rotate: -5 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="relative"
+                >
+                  <div className="absolute -inset-2 rounded-xl bg-primary/20 blur" />
+                  <div className="relative rounded-lg bg-white p-4 shadow-lg border border-gray-200 dark:border-gray-700">
+                    <QRCodeSVG
+                      id="qr-code-svg"
+                      value={qrValue}
+                      size={220}
+                      level="H"
+                      includeMargin
+                      bgColor="#FFFFFF"
+                      fgColor="#111827"
+                    />
+                  </div>
+                </motion.div>
+
+                <p className="text-center text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                  Scan this QR code with the BusBuddy validator app to verify your pass
+                </p>
+
+                <div className="flex gap-3 w-full max-w-xs">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                    onClick={handleDownload}
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
+                    onClick={handleShare}
+                  >
+                    <Share2 className="mr-2 h-4 w-4" />
+                    Share
+                  </Button>
+                </div>
+
+                <div className="w-full pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-center text-gray-400 dark:text-gray-500">
+                    Valid only for the specified route and duration
+                  </p>
+                </div>
+              </motion.div>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
   )
 }

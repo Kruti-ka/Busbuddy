@@ -102,7 +102,7 @@ export function PaymentForm({ amount, onSuccess, onCancel }: PaymentFormProps) {
         </Button>
         <Button
           type="submit"
-          className="flex-1 bg-primary-red hover:bg-primary-red/90 text-base-white"
+          className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           disabled={!stripe || loading}
         >
           {loading ? (

@@ -16,9 +16,9 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-
-
-const db = getFirestore();
+// Initialize Firebase
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+const db = getFirestore(app);
 
 // Types
 interface BusLocation {
@@ -41,6 +41,7 @@ const TrackBus = () => {
   const [busLocation, setBusLocation] = useState<BusLocation>(defaultLocation);
   const [loading, setLoading] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const handleLocationUpdate = useCallback((docSnap: any) => {
     if (docSnap.exists()) {
@@ -56,9 +57,17 @@ const TrackBus = () => {
   }, []);
 
   useEffect(() => {
-    const docRef = doc(db, 'busLocation', 'current');
-    const unsubscribe = onSnapshot(docRef, handleLocationUpdate);
-    return () => unsubscribe();
+    try {
+      const docRef = doc(db, 'busLocation', 'current');
+      const unsubscribe = onSnapshot(docRef, handleLocationUpdate, (error) => {
+        console.error("Error fetching bus location:", error);
+        setLoading(false);
+      });
+      return () => unsubscribe();
+    } catch (error) {
+      console.error("Error setting up Firebase listener:", error);
+      setLoading(false);
+    }
   }, [handleLocationUpdate]);
 
   const toggleInfoWindow = useCallback(() => {
@@ -67,6 +76,10 @@ const TrackBus = () => {
 
   const closeInfoWindow = useCallback(() => {
     setShowInfo(false);
+  }, []);
+
+  const handleMapLoad = useCallback(() => {
+    setMapLoaded(true);
   }, []);
 
   if (loading) {
@@ -89,7 +102,6 @@ const TrackBus = () => {
             src="https://cdn-icons-png.flaticon.com/128/6544/6544041.png"
             alt="Location Icon"
             className="w-6 h-6"
-            loading="lazy"
           />
         </span>
       </h1>
@@ -98,6 +110,7 @@ const TrackBus = () => {
         <LoadScript
           googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}
           loadingElement={<div className="h-96 bg-gray-200 animate-pulse" />}
+          onLoad={handleMapLoad}
         >
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
@@ -109,21 +122,19 @@ const TrackBus = () => {
               mapTypeControl: false,
               fullscreenControl: false,
             }}
+            onLoad={handleMapLoad}
           >
-            <Marker
-              position={busLocation}
-              onClick={toggleInfoWindow}
-              icon={
-                typeof window !== 'undefined' && window.google
-                  ? {
-                      url: 'https://cdn-icons-png.flaticon.com/128/3448/3448339.png',
-                      scaledSize: new window.google.maps.Size(40, 40),
-                    }
-                  : undefined
-              }
-              
-            />
-            {showInfo && (
+            {mapLoaded && (
+              <Marker
+                position={busLocation}
+                onClick={toggleInfoWindow}
+                icon={{
+                  url: 'https://cdn-icons-png.flaticon.com/128/3448/3448339.png',
+                  scaledSize: new window.google.maps.Size(40, 40),
+                }}
+              />
+            )}
+            {showInfo && mapLoaded && (
               <InfoWindow position={busLocation} onCloseClick={closeInfoWindow}>
                 <div className="p-2">
                   <h3 className="font-bold text-lg mb-1">Bus Location</h3>

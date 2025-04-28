@@ -1,4 +1,3 @@
-// E:\PERSONAL\KRITIKA\bus buddy ver 1\Busbuddy\app\dashboard\create-pass\page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -85,7 +84,6 @@ export default function CreatePass() {
           setTimeout(() => router.push("/dashboard/view-pass"), 2000)
         }
 
-        // Pre-fill form with user data if available
         if (userProfile) {
           form.setValue("fullName", userProfile.fullName || "")
         }
@@ -105,7 +103,6 @@ export default function CreatePass() {
     setIsProcessing(true)
     
     try {
-      // Calculate amount based on validity
       let calculatedAmount = 0
       switch (data.validity) {
         case "7":
@@ -145,21 +142,14 @@ export default function CreatePass() {
         variant: "default",
       });
 
-      // Upload image to Cloudinary if exists
       let profileImageUrl = null;
       
       if (passData.profileImage) {
-        console.log("Profile image found:", typeof passData.profileImage);
-        
         if (passData.profileImage instanceof File) {
           try {
-            // Upload the image to Cloudinary
-            console.log("Uploading file to Cloudinary...");
             profileImageUrl = await uploadImageToCloudinary(passData.profileImage);
-            console.log("Upload successful, URL:", profileImageUrl);
           } catch (uploadError) {
             console.error("Image upload failed:", uploadError);
-            // Continue with null image URL
             toast({
               title: "Image Upload Failed",
               description: "We couldn't upload your profile image, but will continue creating your pass.",
@@ -167,17 +157,14 @@ export default function CreatePass() {
             });
           }
         } else if (typeof passData.profileImage === 'string') {
-          // If it's already a URL, use it directly
           profileImageUrl = passData.profileImage;
         }
       }
 
-      // Calculate end date based on start date and validity
       const startDate = passData.startDate || new Date();
       const endDate = new Date(startDate);
       endDate.setDate(endDate.getDate() + Number.parseInt(passData.validity));
 
-      // Create pass object with all required fields
       const passObject = {
         userId: user.uid,
         fullName: passData.fullName,
@@ -192,11 +179,10 @@ export default function CreatePass() {
         amount,
         paymentIntentId,
         createdAt: Timestamp.now(),
-        profileImageUrl: profileImageUrl, // Always include this property whether null or has a URL
+        profileImageUrl: profileImageUrl,
       };
 
-      // Create pass in Firestore
-      const passRef = await addDoc(collection(db, "passes"), passObject);
+      await addDoc(collection(db, "passes"), passObject);
 
       toast({
         title: "Pass created successfully!",
@@ -223,28 +209,37 @@ export default function CreatePass() {
 
   if (hasActivePass) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex min-h-[calc(100vh-140px)] items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold">Redirecting...</h2>
-          <p className="text-muted-foreground">You already have an active pass. Taking you to view pass.</p>
+          <h2 className="text-2xl font-bold tracking-tight">Redirecting...</h2>
+          <p className="mt-2 text-muted-foreground">You already have an active pass. Taking you to view pass.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <DashboardHeader title="Create Pass" description="Create your digital bus pass" />
+    <div className="space-y-8">
+      <DashboardHeader 
+        title="Create New Bus Pass" 
+        description="Fill in your details to create a digital bus pass" 
+      />
 
       {showPayment ? (
-        <div className="mx-auto max-w-md space-y-6 rounded-lg border bg-card p-6 shadow-sm">
-          <div className="space-y-2 text-center">
-            <h2 className="text-2xl font-bold">Complete Payment</h2>
-            <p className="text-muted-foreground">Amount to pay: ₹{amount.toFixed(2)}</p>
+        <div className="mx-auto max-w-2xl">
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="mb-8 space-y-1 text-center">
+              <h2 className="text-2xl font-bold tracking-tight">Complete Payment</h2>
+              <p className="text-muted-foreground">Amount to pay: ₹{amount.toFixed(2)}</p>
+            </div>
+            <Elements stripe={stripePromise}>
+              <PaymentForm 
+                amount={amount} 
+                onSuccess={handlePaymentSuccess} 
+                onCancel={() => setShowPayment(false)} 
+              />
+            </Elements>
           </div>
-          <Elements stripe={stripePromise}>
-            <PaymentForm amount={amount} onSuccess={handlePaymentSuccess} onCancel={() => setShowPayment(false)} />
-          </Elements>
         </div>
       ) : (
         <CreatePassForm form={form} onSubmit={onSubmit} isProcessing={isProcessing} />

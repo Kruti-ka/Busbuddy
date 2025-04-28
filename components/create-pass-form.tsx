@@ -14,8 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, addDays } from "date-fns"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { cn } from "@/lib/utils"
 
-// Mock data for dropdowns
 const ROUTES = [
   { id: "route1", name: "Route 101 - City Express" },
   { id: "route2", name: "Route 202 - Metro Connect" },
@@ -40,18 +40,14 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  // Calculate end date based on start date and validity
   useEffect(() => {
     const startDate = form.watch("startDate")
     const validity = form.watch("validity")
 
     if (startDate && validity) {
-      // Convert validity to number and subtract 1 day
       const validityDays = Number.parseInt(validity, 10)
       const calculatedEndDate = addDays(startDate, validityDays - 1)
       setEndDate(calculatedEndDate)
-
-      // Update the form's endDate field
       form.setValue("endDate", calculatedEndDate)
     }
   }, [form.watch("startDate"), form.watch("validity"), form])
@@ -90,15 +86,23 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
   }
 
   return (
-    <Card className="dashboard-card overflow-visible">
-      <CardContent className="pt-6">
+    <Card className="border-none shadow-none">
+      <CardContent className="p-0">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <motion.div variants={container} initial="hidden" animate="show" className="grid gap-8 md:grid-cols-2">
+            <motion.div 
+              variants={container} 
+              initial="hidden" 
+              animate="show" 
+              className="grid gap-8 md:grid-cols-2"
+            >
+              {/* Personal Information Section */}
               <motion.div variants={item} className="space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-primary-red">Personal Information</h3>
-                  <p className="text-sm text-neutral-text">Enter your personal details for the bus pass</p>
+                  <h3 className="text-lg font-semibold tracking-tight">Personal Information</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Enter your personal details for identification
+                  </p>
                 </div>
 
                 <FormField
@@ -111,7 +115,7 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                         <Input
                           placeholder="John Doe"
                           {...field}
-                          className="border-neutral-gray focus-visible:ring-accent-blue"
+                          className="focus-visible:ring-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -129,7 +133,7 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                         <Input
                           placeholder="Contact Name"
                           {...field}
-                          className="border-neutral-gray focus-visible:ring-accent-blue"
+                          className="focus-visible:ring-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -142,12 +146,12 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                   name="emergencyContactMobile"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Emergency Contact Mobile</FormLabel>
+                      <FormLabel>Emergency Contact Number</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Contact Mobile"
+                          placeholder="+91 9876543210"
                           {...field}
-                          className="border-neutral-gray focus-visible:ring-accent-blue"
+                          className="focus-visible:ring-primary"
                         />
                       </FormControl>
                       <FormMessage />
@@ -156,10 +160,13 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                 />
               </motion.div>
 
+              {/* Route Information Section */}
               <motion.div variants={item} className="space-y-6">
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-accent-blue">Route Information</h3>
-                  <p className="text-sm text-neutral-text">Select your travel route details</p>
+                  <h3 className="text-lg font-semibold tracking-tight">Route Information</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Select your preferred travel route
+                  </p>
                 </div>
 
                 <FormField
@@ -170,8 +177,8 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                       <FormLabel>Source</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="border-neutral-gray focus-visible:ring-accent-blue">
-                            <SelectValue placeholder="Select source" />
+                          <SelectTrigger className="focus-visible:ring-primary">
+                            <SelectValue placeholder="Select boarding point" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -195,8 +202,8 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                       <FormLabel>Destination</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="border-neutral-gray focus-visible:ring-accent-blue">
-                            <SelectValue placeholder="Select destination" />
+                          <SelectTrigger className="focus-visible:ring-primary">
+                            <SelectValue placeholder="Select drop-off point" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -220,8 +227,8 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                       <FormLabel>Route</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="border-neutral-gray focus-visible:ring-accent-blue">
-                            <SelectValue placeholder="Select route" />
+                          <SelectTrigger className="focus-visible:ring-primary">
+                            <SelectValue placeholder="Select your route" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -244,18 +251,18 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                       type="button"
                       variant="outline"
                       onClick={handleGetLocation}
-                      className="border-accent-blue text-accent-blue hover:bg-accent-blue/10"
+                      className="gap-2"
                     >
-                      <MapPin className="mr-2 h-4 w-4" />
+                      <MapPin className="h-4 w-4" />
                       Share Location
                     </Button>
                     {userLocation && (
                       <motion.span
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="text-sm text-accent-blue"
+                        className="text-sm text-green-600"
                       >
-                        Location shared ✓
+                        Location captured
                       </motion.span>
                     )}
                   </div>
@@ -263,13 +270,21 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
               </motion.div>
             </motion.div>
 
-            <motion.div variants={container} initial="hidden" animate="show" className="space-y-6">
+            {/* Pass Details Section */}
+            <motion.div 
+              variants={container} 
+              initial="hidden" 
+              animate="show" 
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-primary-red">Pass Details</h3>
-                <p className="text-sm text-neutral-text">Select your pass validity period</p>
+                <h3 className="text-lg font-semibold tracking-tight">Pass Details</h3>
+                <p className="text-sm text-muted-foreground">
+                  Configure your pass validity period
+                </p>
               </div>
 
-              <div className="grid gap-6 md:grid-cols-3">
+              <div className="grid gap-4 md:grid-cols-3">
                 <FormField
                   control={form.control}
                   name="startDate"
@@ -281,9 +296,10 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                           <FormControl>
                             <Button
                               variant={"outline"}
-                              className={`w-full border-neutral-gray pl-3 text-left font-normal ${
+                              className={cn(
+                                "pl-3 text-left font-normal",
                                 !field.value && "text-muted-foreground"
-                              }`}
+                              )}
                             >
                               {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                               <Calendar className="ml-auto h-4 w-4 opacity-50" />
@@ -311,18 +327,15 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center gap-2">
-                        <FormLabel>Validity</FormLabel>
+                        <FormLabel>Validity Period</FormLabel>
                         <TooltipProvider>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Info className="h-4 w-4 text-neutral-text cursor-help" />
+                              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">Daily Trip Limit</span>
-                              </div>
-                              <p className="text-xs">
-                                🚌 You are allowed a maximum of 2 trips per day during the pass validity period.
+                              <p className="text-sm">
+                                Your pass allows unlimited travel during the validity period.
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -330,8 +343,8 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                       </div>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="border-neutral-gray focus-visible:ring-accent-blue">
-                            <SelectValue placeholder="Select validity period" />
+                          <SelectTrigger className="focus-visible:ring-primary">
+                            <SelectValue placeholder="Select validity" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -340,9 +353,6 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                           <SelectItem value="30">30 days (₹1500)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <div className="mt-1 flex items-center gap-1">
-                        <span className="text-xs text-neutral-text">🚌 Maximum 2 trips per day</span>
-                      </div>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -353,11 +363,11 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
                   name="endDate"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>End Date (Auto-calculated)</FormLabel>
+                      <FormLabel>End Date</FormLabel>
                       <FormControl>
                         <Input
                           value={endDate ? format(endDate, "PPP") : ""}
-                          className="border-neutral-gray bg-neutral-gray/50 focus-visible:ring-accent-blue"
+                          className="bg-muted/50"
                           readOnly
                         />
                       </FormControl>
@@ -368,10 +378,18 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
               </div>
             </motion.div>
 
-            <motion.div variants={item} initial="hidden" animate="show" className="space-y-4">
+            {/* Profile Photo Section */}
+            <motion.div 
+              variants={item} 
+              initial="hidden" 
+              animate="show" 
+              className="space-y-6"
+            >
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-accent-blue">Profile Photo</h3>
-                <p className="text-sm text-neutral-text">Upload a clear photo for your bus pass</p>
+                <h3 className="text-lg font-semibold tracking-tight">Profile Photo</h3>
+                <p className="text-sm text-muted-foreground">
+                  Upload a clear photo for your bus pass ID
+                </p>
               </div>
 
               <FormField
@@ -388,24 +406,27 @@ export function CreatePassForm({ form, onSubmit, isProcessing = false }: CreateP
               />
             </motion.div>
 
+            {/* Submit Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.4 }}
+              className="pt-4"
             >
               <Button 
                 type="submit" 
-                className="w-full bg-primary-red hover:bg-primary-red/90 text-base-white"
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="lg"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
                   <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-white"></div>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-transparent border-t-current"></div>
                     Processing...
                   </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard className="h-4 w-4" />
                     Proceed to Payment
                   </>
                 )}
