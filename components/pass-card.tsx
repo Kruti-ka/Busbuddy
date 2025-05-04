@@ -10,6 +10,8 @@ import { Calendar, Clock, MapPin, Route, Download, Share2, Phone } from "lucide-
 import { motion } from "framer-motion"
 import { useAuth } from "@/lib/auth-context"
 import { cn } from "@/lib/utils"
+import { doc, getDoc } from "firebase/firestore"
+import { db } from "@/lib/firebase"
 
 interface PassCardProps {
   pass: {
@@ -30,6 +32,8 @@ interface PassCardProps {
 export function PassCard({ pass }: PassCardProps) {
   const [daysRemaining, setDaysRemaining] = useState(0)
   const [qrValue, setQrValue] = useState("")
+  const [isExpired, setIsExpired] = useState(false)
+  const [dailyTripCount, setDailyTripCount] = useState(0)
   const { userProfile } = useAuth()
 
   useEffect(() => {
@@ -39,6 +43,9 @@ export function PassCard({ pass }: PassCardProps) {
     const diffTime = endDate.getTime() - now.getTime()
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
     setDaysRemaining(diffDays)
+    
+    // Check if pass is expired based on end date
+    setIsExpired(diffDays <= 0)
 
     // Generate QR code value with the specified format
     const qrData = {
@@ -48,6 +55,27 @@ export function PassCard({ pass }: PassCardProps) {
       endDate: pass.endDate
     }
     setQrValue(JSON.stringify(qrData))
+    
+    // Fetch daily trip count from Firestore
+    const fetchDailyTripCount = async () => {
+      try {
+        const scannedQrRef = doc(db, "scanned_qrs", pass.id)
+        const scannedQrSnap = await getDoc(scannedQrRef)
+        
+        if (scannedQrSnap.exists()) {
+          const data = scannedQrSnap.data()
+          setDailyTripCount(data.daily_trip_count || 0)
+        } else {
+          // No record found, set to 0
+          setDailyTripCount(0)
+        }
+      } catch (error) {
+        console.error("Error fetching daily trip count:", error)
+        setDailyTripCount(0)
+      }
+    }
+    
+    fetchDailyTripCount()
   }, [pass])
 
   const formatDate = (dateString: string) => {
@@ -107,6 +135,30 @@ export function PassCard({ pass }: PassCardProps) {
 
   // Determine which profile image URL to use
   const profileImageUrl = pass.profileImageUrl || userProfile?.profileImageUrl || "/placeholder.svg"
+  
+  // Determine QR code color based on dailyTripCount and expiration status
+  const getQRColor = () => {
+    if (isExpired || dailyTripCount >= 2) {
+      return "#d1d5db" // Gray QR when expired or daily trip count is 2
+    } else if (dailyTripCount === 1) {
+      return "#22c55e" // Green QR when daily trip count is 1
+    } else {
+      return "#111827" // Black QR when daily trip count is 0
+    }
+  }
+  
+  // Determine if QR code should show invalid overlay
+  const showInvalidOverlay = isExpired || dailyTripCount >= 2
+  
+  // Get appropriate message for invalid QR
+  const getInvalidMessage = () => {
+    if (isExpired) {
+      return "Pass is expired"
+    } else if (dailyTripCount >= 2) {
+      return "Last Trip Done"
+    }
+    return ""
+  }
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -262,27 +314,53 @@ export function PassCard({ pass }: PassCardProps) {
                 >
                   <div className="absolute -inset-2 rounded-xl bg-primary/20 blur" />
                   <div className="relative rounded-lg bg-white p-4 shadow-lg border border-gray-200 dark:border-gray-700">
-                    <QRCodeSVG
-                      id="qr-code-svg"
-                      value={qrValue}
-                      size={220}
-                      level="H"
-                      includeMargin
-                      bgColor="#FFFFFF"
-                      fgColor="#111827"
-                    />
+                    {/* QR Code with dynamic color based on trip count */}
+                    <div className="relative">
+                      <QRCodeSVG
+                        id="qr-code-svg"
+                        value={qrValue}
+                        size={220}
+                        level="H"
+                        includeMargin
+                        bgColor="#FFFFFF"
+                        fgColor={getQRColor()}
+                      />
+                      
+                      {/* Invalid overlay for expired pass or used trips */}
+                      {showInvalidOverlay && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+                            <span className="text-5xl">❌</span>
+                          </div>
+                          <div className="absolute bottom-6 left-0 right-0 text-center">
+                            <span className="bg-white/90 px-3 py-1 rounded-md text-red-600 font-bold text-sm">
+                              Invalid
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </motion.div>
 
-                <p className="text-center text-sm text-gray-500 dark:text-gray-400 max-w-xs">
-                  Scan this QR code with the BusBuddy validator app to verify your pass
-                </p>
+                {/* Status message for invalid pass */}
+                {showInvalidOverlay && (
+                  <div className="bg-red-50 border border-red-200 rounded-md px-4 py-2 text-red-700 text-center w-full max-w-xs">
+                    {getInvalidMessage()}
+                  </div>
+                )}
+                
+                {/* Display daily trip counter */}
+                <div className="bg-blue-50 border border-blue-200 rounded-md px-4 py-2 text-blue-700 text-center w-full max-w-xs">
+                  Trips today: {dailyTripCount}/2 
+                </div>
 
                 <div className="flex gap-3 w-full max-w-xs">
                   <Button
                     variant="outline"
                     className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                     onClick={handleDownload}
+                    disabled={isExpired || dailyTripCount >= 2}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
@@ -291,6 +369,7 @@ export function PassCard({ pass }: PassCardProps) {
                     variant="outline"
                     className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                     onClick={handleShare}
+                    disabled={isExpired || dailyTripCount >= 2}
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Share
