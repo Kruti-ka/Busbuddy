@@ -90,7 +90,7 @@ export default function Dashboard() {
         className="flex flex-col gap-2"
       >
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-          Welcome back, <span className="text-primary">{userName}</span>
+          Welcome , <span  style={{ color: '#FF9D23' }}>{userName}</span>
         </h1>
         <p className="text-muted-foreground">Here's what's happening with your transit today</p>
       </motion.div>
@@ -182,7 +182,8 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">
                 Create a new digital bus pass with QR code validation for quick boarding
               </p>
-              <Button asChild className="w-full mt-4">
+              <Button asChild className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
+
                 <Link href="/dashboard/create-pass">Create Pass</Link>
               </Button>
             </CardContent>
@@ -208,7 +209,7 @@ export default function Dashboard() {
                   ? `You have ${stats.activePasses} active pass${stats.activePasses > 1 ? "es" : ""}`
                   : "No active passes currently"}
               </p>
-              <Button asChild variant="outline" className="w-full mt-4">
+              <Button asChild variant="outline" className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
                 <Link href="/dashboard/view-pass">View Passes</Link>
               </Button>
             </CardContent>
@@ -232,7 +233,7 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">
                 Track your bus in real-time and get accurate arrival time estimates
               </p>
-              <Button asChild variant="outline" className="w-full mt-4">
+              <Button asChild variant="outline" className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
                 <Link href="/dashboard/track-bus">Track Now</Link>
               </Button>
             </CardContent>

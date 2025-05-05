@@ -19,8 +19,8 @@ export function LandingNavbar() {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">Bus</span>
-              <span className="text-xl font-bold text-secondary"> Buddy</span>
+            <span className="text-xl font-bold text-black">BUS</span>
+              <span className="text-xl font-bold text-primary"> BUDDY</span>
           </Link>
         </div>
 

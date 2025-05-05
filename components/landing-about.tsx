@@ -13,7 +13,7 @@ export function LandingAbout() {
         <div className="grid gap-12 md:grid-cols-2 md:gap-16">
           <div className="flex items-center justify-center">
             <div className="relative h-[300px] w-full max-w-[500px] overflow-hidden rounded-lg">
-              <Image src="./bus image.png" alt="About BusBuddy" fill className="object-cover" />
+              <Image src="./5282.jpg" alt="About BusBuddy" fill className="object-cover" />
             </div>
           </div>
           <div className="flex flex-col justify-center space-y-4">

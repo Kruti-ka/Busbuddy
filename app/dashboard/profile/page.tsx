@@ -21,7 +21,8 @@ const formSchema = z.object({
 export default function Profile() {
   const { user, userProfile, updateUserProfile } = useAuth()
   const { toast } = useToast()
-  const [loading, setLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentImage, setCurrentImage] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -44,21 +45,29 @@ export default function Profile() {
       })
       if (userProfile.profileImageUrl) {
         setCurrentImage(userProfile.profileImageUrl)
+        // Set the profile image in form data as well
+        form.setValue("profileImage", userProfile.profileImageUrl)
       }
     } else if (user?.email) {
       form.setValue("email", user.email)
     }
-    setLoading(false)
+    setIsLoading(false)
   }, [user, userProfile, form])
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!user) return
+    
+    console.log("Form submitted with data:", data)
 
     try {
-      setLoading(true)
+      setIsSubmitting(true)
 
       // Extract profile image file from form data
-      const profileImageFile = data.profileImage instanceof File ? data.profileImage : null
+      const profileImageFile = data.profileImage instanceof File 
+        ? data.profileImage 
+        : data.profileImage !== currentImage && typeof data.profileImage === 'string'
+          ? data.profileImage
+          : null
 
       // Prepare update data
       const updateData = {
@@ -68,8 +77,12 @@ export default function Profile() {
         gender: data.gender,
       }
 
+      console.log("Sending update data:", updateData)
+      console.log("Profile image:", profileImageFile)
+
       // Update user profile with potential image file
-      await updateUserProfile(updateData, profileImageFile)
+      const result = await updateUserProfile(updateData, profileImageFile)
+      console.log("Update result:", result)
 
       toast({
         title: "Profile updated",
@@ -84,11 +97,11 @@ export default function Profile() {
         variant: "destructive",
       })
     } finally {
-      setLoading(false)
+      setIsSubmitting(false)
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingScreen />
   }
 
@@ -99,7 +112,7 @@ export default function Profile() {
         form={form} 
         onSubmit={onSubmit} 
         currentImage={currentImage}
-        loading={loading}
+        loading={isSubmitting}
       />
     </div>
   )

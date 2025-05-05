@@ -67,16 +67,17 @@ export function DashboardSidebar() {
     <>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild className="md:hidden">
-          <Button variant="outline" size="icon" className="absolute left-4 top-4 border-primary text-primary">
+          <Button variant="outline" size="icon" className="absolute right-4 top-4 border-primary text-primary">
             <Menu className="h-5 w-5" />
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="border-r-neutral-gray bg-base-white p-0">
+        <SheetContent side="right" className="border-r-neutral-gray bg-base-white p-0">
           <div className="flex h-full flex-col">
             <div className="border-b border-neutral-gray p-4">
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-primary">BusBuddy</span>
+              <span className="text-xl font-bold text-black">BUS</span>
+              <span className="text-xl font-bold text-primary"> BUDDY</span>
               </div>
             </div>
             <div className="flex-1 overflow-auto py-2">

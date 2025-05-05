@@ -9,11 +9,14 @@ export function LandingHero() {
         <div className="grid gap-12 md:grid-cols-2 md:gap-16">
           <div className="flex flex-col justify-center space-y-4">
             <div className="space-y-2">
-              <h2 className="text-secondary"> HOP ON, HASSLE-FREE
-              </h2>
+            <h2 style={{ color: '#050316' }}>HOP ON, HASSLE-FREE</h2>
+
+
+
+
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
                 <span className="text-primary">SMART ECO-</span>
-                <span className="text-secondary">COMMUTE</span>
+                <span style={{ color: '#FF9D23' }}>COMMUTE</span>
                 <br />
               
                 </h1>

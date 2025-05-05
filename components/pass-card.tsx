@@ -170,8 +170,8 @@ export function PassCard({ pass }: PassCardProps) {
         <Card className="overflow-hidden border-0 shadow-xl">
           {/* Card Header with Solid Color */}
           <CardHeader className={cn(
-            "relative p-6 text-white",
-            "bg-primary",
+            "relative p-6 text-black",
+            "bg-gradient-to-r from-orange-500 to-amber-500 pb-8 pt-6",
             "border-b border-white/10"
           )}>
             <div className="absolute inset-0 bg-noise opacity-10" />
