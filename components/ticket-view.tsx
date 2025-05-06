@@ -57,7 +57,8 @@ export function TicketView({ ticket, onBookAgain }: TicketViewProps) {
   
   return (
     <Card className="mx-auto max-w-md overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-orange-500 to-amber-500 pb-8 pt-6">
+      <CardHeader className="bg-gradient-to-r from-[#25C199] to-[#3DD9AC] pb-8 pt-6">
+
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-medium text-black">Bus Ticket</h3>

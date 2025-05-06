@@ -176,13 +176,16 @@ export default function Dashboard() {
                   <CardTitle className="text-lg">Create New Pass</CardTitle>
                   <CardDescription>Get your digital bus pass</CardDescription>
                 </div>
+
+                
               </div>
             </CardHeader>
             <CardContent className="flex flex-col justify-between h-32">
               <p className="text-sm text-muted-foreground">
                 Create a new digital bus pass with QR code validation for quick boarding
               </p>
-              <Button asChild className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
+              <Button asChild className="w-full mt-4 bg-[#25C199] text-white hover:bg-[#1FA883]">
+
 
                 <Link href="/dashboard/create-pass">Create Pass</Link>
               </Button>
@@ -209,7 +212,7 @@ export default function Dashboard() {
                   ? `You have ${stats.activePasses} active pass${stats.activePasses > 1 ? "es" : ""}`
                   : "No active passes currently"}
               </p>
-              <Button asChild variant="outline" className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
+              <Button asChild className="w-full mt-4 bg-[#25C199] text-white hover:bg-[#1FA883]">
                 <Link href="/dashboard/view-pass">View Passes</Link>
               </Button>
             </CardContent>
@@ -233,7 +236,7 @@ export default function Dashboard() {
               <p className="text-sm text-muted-foreground">
                 Track your bus in real-time and get accurate arrival time estimates
               </p>
-              <Button asChild variant="outline" className="w-full mt-4 bg-[#FF9D23] text-black hover:bg-[#e68c1f]">
+              <Button asChild className="w-full mt-4 bg-[#25C199] text-white hover:bg-[#1FA883]">
                 <Link href="/dashboard/track-bus">Track Now</Link>
               </Button>
             </CardContent>
