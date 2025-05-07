@@ -31,13 +31,15 @@ interface PassCardProps {
 
 export function PassCard({ pass }: PassCardProps) {
   const [daysRemaining, setDaysRemaining] = useState(0)
+  const [daysUntilActive, setDaysUntilActive] = useState(0)
   const [qrValue, setQrValue] = useState("")
   const [isExpired, setIsExpired] = useState(false)
+  const [isFuture, setIsFuture] = useState(false)
   const [dailyTripCount, setDailyTripCount] = useState(0)
   const { userProfile } = useAuth()
 
   useEffect(() => {
-    // Calculate days remaining
+    // Calculate days remaining until expiration
     const endDate = new Date(pass.endDate)
     const now = new Date()
     const diffTime = endDate.getTime() - now.getTime()
@@ -46,6 +48,15 @@ export function PassCard({ pass }: PassCardProps) {
     
     // Check if pass is expired based on end date
     setIsExpired(diffDays <= 0)
+
+    // Calculate days until pass becomes active
+    const startDate = new Date(pass.startDate)
+    const diffTimeUntilActive = startDate.getTime() - now.getTime()
+    const diffDaysUntilActive = Math.ceil(diffTimeUntilActive / (1000 * 60 * 60 * 24))
+    setDaysUntilActive(diffDaysUntilActive)
+    
+    // Check if pass start date is in the future
+    setIsFuture(diffDaysUntilActive > 0)
 
     // Generate QR code value with the specified format
     const qrData = {
@@ -136,10 +147,10 @@ export function PassCard({ pass }: PassCardProps) {
   // Determine which profile image URL to use
   const profileImageUrl = pass.profileImageUrl || userProfile?.profileImageUrl || "/placeholder.svg"
   
-  // Determine QR code color based on dailyTripCount and expiration status
+  // Determine QR code color based on status (future date, daily trip count, expiration)
   const getQRColor = () => {
-    if (isExpired || dailyTripCount >= 2) {
-      return "#d1d5db" // Gray QR when expired or daily trip count is 2
+    if (isFuture || isExpired || dailyTripCount >= 2) {
+      return "#d1d5db" // Gray QR when not valid (future, expired, or daily trip count is 2)
     } else if (dailyTripCount === 1) {
       return "#22c55e" // Green QR when daily trip count is 1
     } else {
@@ -148,18 +159,19 @@ export function PassCard({ pass }: PassCardProps) {
   }
   
   // Determine if QR code should show invalid overlay
-  const showInvalidOverlay = isExpired || dailyTripCount >= 2
+  const showInvalidOverlay = isFuture || isExpired || dailyTripCount >= 2
   
   // Get appropriate message for invalid QR
   const getInvalidMessage = () => {
-    if (isExpired) {
+    if (isFuture) {
+      return `Pass activates in ${daysUntilActive} day${daysUntilActive !== 1 ? 's' : ''}`
+    } else if (isExpired) {
       return "Pass is expired"
     } else if (dailyTripCount >= 2) {
       return "Last Trip Done"
     }
     return ""
   }
-
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -192,17 +204,31 @@ export function PassCard({ pass }: PassCardProps) {
                 </motion.div>
               </div>
               
-              <Badge
-                variant={daysRemaining > 7 ? "outline" : "destructive"}
-                className={cn(
-                  "text-sm font-medium py-1.5 px-3 rounded-lg shadow-sm",
-                  daysRemaining > 7 
-                    ? "bg-white/10 text-white backdrop-blur-sm border-white/20"
-                    : "bg-destructive text-white border-white/20"
-                )}
-              >
-                {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Expired"}
-              </Badge>
+              {isFuture ? (
+                <Badge
+                  variant="secondary"
+                  className="text-sm font-medium py-1.5 px-3 rounded-lg shadow-sm border"
+                  style={{
+                    backgroundColor: '#FF9D23',
+                    color: '#4B3200', // choose a readable dark color
+                    borderColor: '#e68a1d' // slightly darker border
+                  }}>
+
+                  Activates in {daysUntilActive} day{daysUntilActive !== 1 ? 's' : ''}
+                </Badge>
+              ) : (
+                <Badge
+                  variant={daysRemaining > 7 ? "outline" : "destructive"}
+                  className={cn(
+                    "text-sm font-medium py-1.5 px-3 rounded-lg shadow-sm",
+                    daysRemaining > 7 
+                      ? "bg-white/10 text-white backdrop-blur-sm border-white/20"
+                      : "bg-destructive text-white border-white/20"
+                  )}
+                >
+                  {daysRemaining > 0 ? `${daysRemaining} days remaining` : "Expired"}
+                </Badge>
+              )}
             </div>
           </CardHeader>
 
@@ -248,7 +274,10 @@ export function PassCard({ pass }: PassCardProps) {
                         <Calendar className="h-4 w-4 text-primary" />
                         <span>Start Date</span>
                       </div>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className={cn(
+                        "font-medium",
+                        isFuture ? "text-yellow-600 dark:text-yellow-400" : "text-gray-900 dark:text-white"
+                      )}>
                         {formatDate(pass.startDate)}
                       </p>
                     </div>
@@ -257,7 +286,10 @@ export function PassCard({ pass }: PassCardProps) {
                         <Clock className="h-4 w-4 text-primary" />
                         <span>End Date</span>
                       </div>
-                      <p className="font-medium text-gray-900 dark:text-white">
+                      <p className={cn(
+                        "font-medium",
+                        isExpired ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"
+                      )}>
                         {formatDate(pass.endDate)}
                       </p>
                     </div>
@@ -315,7 +347,7 @@ export function PassCard({ pass }: PassCardProps) {
                 >
                   <div className="absolute -inset-2 rounded-xl bg-primary/20 blur" />
                   <div className="relative rounded-lg bg-white p-4 shadow-lg border border-gray-200 dark:border-gray-700">
-                    {/* QR Code with dynamic color based on trip count */}
+                    {/* QR Code with dynamic color based on validity */}
                     <div className="relative">
                       <QRCodeSVG
                         id="qr-code-svg"
@@ -327,15 +359,20 @@ export function PassCard({ pass }: PassCardProps) {
                         fgColor={getQRColor()}
                       />
                       
-                      {/* Invalid overlay for expired pass or used trips */}
+                      {/* Invalid overlay for future, expired pass or used trips */}
                       {showInvalidOverlay && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-                            <span className="text-5xl">❌</span>
+                            <span className="text-5xl">{isFuture ? "⏱️" : "❌"}</span>
                           </div>
                           <div className="absolute bottom-6 left-0 right-0 text-center">
-                            <span className="bg-white/90 px-3 py-1 rounded-md text-red-600 font-bold text-sm">
-                              Invalid
+                            <span className={cn(
+                              "px-3 py-1 rounded-md font-bold text-sm",
+                              isFuture 
+                                ? "bg-[#FF9D23]/90 text-[#4B3200]"
+                                : "bg-[#FF9D23]/90 text-[#4B3200]"
+                            )}>
+                              {isFuture ? "Not Active" : "Invalid"}
                             </span>
                           </div>
                         </div>
@@ -346,7 +383,12 @@ export function PassCard({ pass }: PassCardProps) {
 
                 {/* Status message for invalid pass */}
                 {showInvalidOverlay && (
-                  <div className="bg-red-50 border border-red-200 rounded-md px-4 py-2 text-red-700 text-center w-full max-w-xs">
+                  <div className={cn(
+                    "border rounded-md px-4 py-2 text-center w-full max-w-xs",
+                    isFuture 
+                      ? "bg-yellow-50 border-yellow-200 text-yellow-700" 
+                      : "bg-red-50 border-red-200 text-red-700"
+                  )}>
                     {getInvalidMessage()}
                   </div>
                 )}
@@ -361,7 +403,7 @@ export function PassCard({ pass }: PassCardProps) {
                     variant="outline"
                     className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                     onClick={handleDownload}
-                    disabled={isExpired || dailyTripCount >= 2}
+                    disabled={isFuture || isExpired || dailyTripCount >= 2}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
@@ -370,7 +412,7 @@ export function PassCard({ pass }: PassCardProps) {
                     variant="outline"
                     className="flex-1 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50"
                     onClick={handleShare}
-                    disabled={isExpired || dailyTripCount >= 2}
+                    disabled={isFuture || isExpired || dailyTripCount >= 2}
                   >
                     <Share2 className="mr-2 h-4 w-4" />
                     Share

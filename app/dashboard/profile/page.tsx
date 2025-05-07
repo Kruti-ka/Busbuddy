@@ -15,7 +15,6 @@ const formSchema = z.object({
   email: z.string().email("Invalid email address"),
   mobile: z.string().min(10, "Valid mobile number is required"),
   gender: z.enum(["male", "female", "other"]),
-  profileImage: z.any().optional(),
 })
 
 export default function Profile() {
@@ -23,7 +22,6 @@ export default function Profile() {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [currentImage, setCurrentImage] = useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,11 +41,6 @@ export default function Profile() {
         mobile: userProfile.mobile || "",
         gender: userProfile.gender as "male" | "female" | "other" || "male",
       })
-      if (userProfile.profileImageUrl) {
-        setCurrentImage(userProfile.profileImageUrl)
-        // Set the profile image in form data as well
-        form.setValue("profileImage", userProfile.profileImageUrl)
-      }
     } else if (user?.email) {
       form.setValue("email", user.email)
     }
@@ -56,20 +49,12 @@ export default function Profile() {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     if (!user) return
-    
+
     console.log("Form submitted with data:", data)
 
     try {
       setIsSubmitting(true)
 
-      // Extract profile image file from form data
-      const profileImageFile = data.profileImage instanceof File 
-        ? data.profileImage 
-        : data.profileImage !== currentImage && typeof data.profileImage === 'string'
-          ? data.profileImage
-          : null
-
-      // Prepare update data
       const updateData = {
         fullName: data.fullName,
         email: data.email,
@@ -78,11 +63,8 @@ export default function Profile() {
       }
 
       console.log("Sending update data:", updateData)
-      console.log("Profile image:", profileImageFile)
 
-      // Update user profile with potential image file
-      const result = await updateUserProfile(updateData, profileImageFile)
-      console.log("Update result:", result)
+      await updateUserProfile(updateData)
 
       toast({
         title: "Profile updated",
@@ -111,7 +93,6 @@ export default function Profile() {
       <ProfileForm 
         form={form} 
         onSubmit={onSubmit} 
-        currentImage={currentImage}
         loading={isSubmitting}
       />
     </div>
